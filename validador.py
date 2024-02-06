@@ -3,6 +3,7 @@ import empresa
 import re
 import os
 import banco
+from mysql.connector import Error
 
 
 def limparTela():
@@ -105,17 +106,37 @@ def senha():
         print("A senha deve conter pelo menos um número")
         input('pressione enter para continuar...')
         limparTela()
+     elif not re.search("[!@#$%*&]", sen):
+        print("A senha deve conter pelo menos uma caracter especial")
+        input('pressione enter para continuar...')
+        limparTela()
      else:
         return sen
      
 def inserir_cliente(nome, email, cpf, login, senha):
    try:
-        
-        co = f'INSERT INTO cliente (nome, email, cpf, login, senha) VALUES ("{nome}","{email}","{cpf}","{login}","{senha}")'
+        erros = []
+
+        ci = ('SELECT COUNT(*) FROM cliente WHERE login = %s')
+        banco.cursor.execute(ci, (login,))
+        resultado = banco.cursor.fetchone()
+        if resultado[0]:
+            erros.append('O usuario ja existe')
+
+        ca = ('SELECT COUNT(*) FROM cliente WHERE cpf = %s')
+        banco.cursor.execute(ca, (cpf,))
+        resultado = banco.cursor.fetchone()
+        if resultado[0]:
+            erros.append('O CPF ja existe')
+
+        if erros:
+            raise ValueError(' '.join(erros))
+
+        co = f'INSERT INTO cliente (nome, email, cpf, login, senha) VALUES ("{nome}", "{email}", "{cpf}", "{login}", "{senha}" )'
         banco.cursor.execute(co)
         banco.con.commit()
-
+        banco.con.close()
         print("Usuário cadastrado com sucesso!")
 
-   except ValueError as e:
+   except banco.mysql.connector.Error as e:
         print(f"Erro: {e}")

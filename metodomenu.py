@@ -22,11 +22,21 @@ def main():
             print('Escolha o tipo de cadastro:')
             print('1. Cadastro de Usuário')
             opcao = input("Escolha uma opção:")
-            if opcao == '1':
-                nome = validador.nome()
-                email = validador.email()
-                cpf = validador.cpf()
-                login = validador.login()
-                senha = validador.senha()
-                validador.inserir_cliente(nome, email, cpf, login, senha)
-            
+        if opcao == '1':
+            while True:
+             try:
+              nome = validador.nome()
+              email = validador.email()
+              cpf = validador.cpf()
+              login = validador.login()
+              senha = validador.senha()
+              validador.inserir_cliente(nome, email, cpf, login, senha)
+              print('Criado com sucesso!!!')
+              break
+             except ValueError as ve:
+              print(f'{ve}')
+              input('pressione enter para continuar...')
+              validador.limparTela()
+              continue
+             except Exception as e:
+              print(f'{e}')
