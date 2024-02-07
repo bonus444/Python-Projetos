@@ -54,14 +54,8 @@ def cnpj():
                input('pressione enter para continuar...')
                limparTela()
                continue 
-            te = c.replace(' ', '')
-            if any(i.isnumeric() for i in te):
-               print('So pode conter numeros..')
-               input('pressione enter para continuar...')
-               limparTela()
-               continue 
             else:
-               return te
+               return c
 def email():
    while True:
     em = input('Digite seu email: ')
@@ -117,14 +111,14 @@ def inserir_cliente(nome, email, cpf, login, senha):
    try:
         erros = []
 
-        ci = ('SELECT COUNT(*) FROM cliente WHERE login = %s')
-        banco.cursor.execute(ci, (login,))
+        bc = ('SELECT COUNT(*) FROM cliente WHERE login = %s')
+        banco.cursor.execute(bc, (login,))
         resultado = banco.cursor.fetchone()
         if resultado[0]:
             erros.append('O usuario ja existe')
 
-        ca = ('SELECT COUNT(*) FROM cliente WHERE cpf = %s')
-        banco.cursor.execute(ca, (cpf,))
+        bcl = ('SELECT COUNT(*) FROM cliente WHERE cpf = %s')
+        banco.cursor.execute(bcl, (cpf,))
         resultado = banco.cursor.fetchone()
         if resultado[0]:
             erros.append('O CPF ja existe')
@@ -132,11 +126,92 @@ def inserir_cliente(nome, email, cpf, login, senha):
         if erros:
             raise ValueError(' '.join(erros))
 
-        co = f'INSERT INTO cliente (nome, email, cpf, login, senha) VALUES ("{nome}", "{email}", "{cpf}", "{login}", "{senha}" )'
-        banco.cursor.execute(co)
+        bcli = f'INSERT INTO cliente (nome, email, cpf, login, senha) VALUES ("{nome}", "{email}", "{cpf}", "{login}", "{senha}" )'
+        banco.cursor.execute(bcli)
+        banco.con.commit()
+        banco.con.close()
+        print("Usuário cadastrado com sucesso!")
+      
+   except banco.mysql.connector.Error as e:
+      print(f"Erro: {e}")
+
+def inserir_empresa(nome, email, cnpj, login, senha):
+   try:
+        erros = []
+
+        if erros:
+            raise ValueError(' '.join(erros))
+
+        be = ('SELECT COUNT(*) FROM empresa WHERE login = %s')
+        banco.cursor.execute(be, (login,))
+        resultado = banco.cursor.fetchone()
+        if resultado[0]:
+            erros.append('O Login ja existe')
+
+        bem = ('SELECT COUNT(*) FROM empresa WHERE cpf = %s')
+        banco.cursor.execute(bem, (cnpj,))
+        resultado = banco.cursor.fetchone()
+        if resultado[0]:
+            erros.append('O CNPJ ja existe')
+
+        bemp = f'INSERT INTO empresa (nome, email, cpf, login, senha) VALUES ("{nome}", "{email}", "{cnpj}", "{login}", "{senha}" )'
+        banco.cursor.execute(bemp)
         banco.con.commit()
         banco.con.close()
         print("Usuário cadastrado com sucesso!")
 
    except banco.mysql.connector.Error as e:
         print(f"Erro: {e}")
+
+def logCL(login, senha):
+    try:
+   
+        erros = []
+
+        l = ('SELECT id, nome, cpf FROM cliente WHERE login = %s and senha = %s')
+        banco.cursor.execute(l, (login,senha,))
+        lo = banco.cursor.fetchone()
+        if not lo:
+            erros.append('Login não Existe')
+    
+        if erros:
+            raise ValueError(' '.join(erros))
+        
+        return banco.cursor.fetchone()
+
+    except banco.mysql.connector.Error as e:
+        print(f'Erro no banco de dados: {e}')
+    except ValueError as e:
+        print(f'Erro no login: {e}')
+
+def logEM(login, senha):
+    try:
+   
+        erros = []
+
+        l = ('SELECT id, nome, cnpj FROM empresa WHERE login = %s and senha = %s')
+        banco.cursor.execute(l, (login,senha,))
+        lo = banco.cursor.fetchone()
+        if not lo:
+            erros.append('Login não Existe')
+        elif lo[4] != senha:  
+            erros.append('Senha errada')
+
+        if erros:
+            raise ValueError(' '.join(erros))
+        
+        return banco.cursor.fetchone()
+
+    except banco.mysql.connector.Error as e:
+        print(f'Erro no banco de dados: {e}')
+    except ValueError as e:
+        print(f'Erro no login: {e}')
+
+     
+
+
+   
+      
+   
+
+    
